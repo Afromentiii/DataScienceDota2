@@ -9,11 +9,16 @@ from lxml import html
 import time
 import re
 
-def find_players_and_picks(Xpath):
-    picks = tree_picks.xpath(picks_xpath_team_a)
+def find_team_name_and_status(Xpath_name, Xpath_status, tree):
+    team_name = tree.xpath(Xpath_name)
+    team_status = tree.xpath(Xpath_status)
+    print(f'Nazwa Druzyny: {team_name[0].text} Status Druzyny: {team_status[0].text}')
+
+def find_players_and_picks(Xpath, tree):
+    picks = tree.xpath(Xpath)
     for elem in picks:
         hero = re.search(r'\(([^)]+)\)', elem.attrib['data-tooltip-html'])[0].strip("()")
-        player = re.search(r'<div><b>.*</b>', elem.attrib['data-tooltip-html'])[0].strip("<div>/<b>")
+        player = re.search(r'<div><b>(.*?)</b>', elem.attrib['data-tooltip-html']).group(1)
         print(f'Bohater: {hero} Gracz: {player}')
 
 options = Options()
@@ -34,20 +39,24 @@ matches = tree.xpath('//*[@id="content"]/div[1]/div/div[1]/div[3]/div[2]//a')
 
 for match in matches:
     href = match.get("href")
-    print(href)
-
-
+    print("Mecz " + href)
 
     full_url = "https://cyberscore.live" + href
     driver.get(full_url)
 
     tree_picks = html.fromstring(driver.page_source)
-    team_a_name = tree_picks.xpath('//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[1]/div/a/span[2]')
     team_b_name = tree_picks.xpath('//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[3]/div/a/span[2]')
-    print(team_a_name[0].text)
-    print(team_b_name[0].text)
 
     picks_xpath_team_a = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[2]/div[1]/div[1]//div[@class="picks-item"]'
-    find_players_and_picks(picks_xpath_team_a)
+    team_name_a_xpath = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[1]/div/a/span[2]'
+    team_status_a_xpath = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[1]/div/div/div[2]'
+    find_team_name_and_status(team_name_a_xpath, team_status_a_xpath, tree_picks)
+    find_players_and_picks(picks_xpath_team_a, tree_picks)
+
+    picks_xpath_team_b = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[2]/div[2]/div[1]//div[@class="picks-item"]'
+    team_name_b_xpath = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[3]/div/a/span[2]'
+    team_status_b_xpath = '//*[@id="content"]/div[1]/div/div/div[2]/div[2]/div/div[2]/div[1]/div[3]/div/div/div[2]'
+    find_team_name_and_status(team_name_b_xpath, team_status_b_xpath, tree_picks)
+    find_players_and_picks(picks_xpath_team_b, tree_picks)
 
 driver.quit()
