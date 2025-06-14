@@ -32,6 +32,7 @@ driver = webdriver.Firefox(options=options)
 
 base_url = "https://cyberscore.live/en/matches/past/?type=past&page="
 max = 50 + 1
+records = []
 for page_num in range(1, max):  # np. N = 5, 10, ile chcesz stron
     url = base_url + str(page_num)
     driver.get(url)
@@ -46,7 +47,12 @@ for page_num in range(1, max):  # np. N = 5, 10, ile chcesz stron
 
     matches = tree.xpath('//*[@id="content"]/div[1]/div/div[1]/div[3]/div[2]//a')
 
-    for match in matches[1:]:
+    for match in matches:
+        status = match.xpath('.//div[3]/div/div/span/text()')
+        if status and "FF" in status[0]:
+            print("Mecz poddany")
+            continue
+      
         record = str()
         href = match.get("href")
         tier = match.xpath('.//div[contains(@class, "tournament-item-col__tier")]//span')
@@ -73,5 +79,16 @@ for page_num in range(1, max):  # np. N = 5, 10, ile chcesz stron
 
         print("\n")
         print(record)
+        records.append(record)
 
+csv_headers = "Team_A_Name, Team_A_Status, Team_A_Carry_Name, Team_A_Carry_Hero, Team_A_Mid_Name, Team_A_Mid_Hero" \
+              "Team_A_Off_Name, Team_A_Off_Hero, Team_A_Support_Name, Team_A_Support_Hero, Team_A_HardSupport_Name, Team_A_HardSupport_Hero" \
+              "Team_B_Name, Team_B_Status, Team_B_Carry_Name, Team_B_Carry_Hero, Team_B_Mid_Name, Team_B_Mid_Hero, " \
+              "Team_B_Off_Name, Team_B_Off_Hero, Team_B_Support_Name, Team_B_Support_Hero, Team_B_HardSupport_Name, Team_B_HardSupport_Hero" \
+              "Tier, Time "
 driver.quit()
+
+with open("matches.csv", "w", encoding="utf-8") as f:
+    f.write(csv_headers + "\n")
+    for record in records:
+        f.write(record + "\n")
