@@ -15,7 +15,7 @@ def znajdz_duplikaty(linie):
     return duplikaty
 
 
-with open("data.csv", encoding="utf-8") as f:
+with open("data2.csv", encoding="utf-8") as f:
     linie = [linia.strip() for linia in f if linia.strip()]
 
 duplikaty = znajdz_duplikaty(linie)

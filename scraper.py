@@ -19,6 +19,7 @@ def find_players_and_picks(Xpath, tree):
     for elem in picks:
         hero = re.search(r'\(([^)]+)\)', elem.attrib['data-tooltip-html'])[0].strip("()")
         player = re.search(r'<div><b>(.*?)</b>', elem.attrib['data-tooltip-html']).group(1)
+        player = player.strip(',')
         players_and_heroes.append(f'{player}, {hero}')
     return ", ".join(players_and_heroes)
 
@@ -87,7 +88,7 @@ def scrape_page(page_num):
 
 if __name__ == "__main__":
     all_records = []
-    pages = range(77, 89)
+    pages = range(271, 401)
     with ThreadPoolExecutor(max_workers=3) as executor:
         futures = [executor.submit(scrape_page, page) for page in pages]
 
@@ -101,7 +102,7 @@ if __name__ == "__main__":
                   "Team_B_Off_Name, Team_B_Off_Hero, Team_B_Support_Name, Team_B_Support_Hero, Team_B_HardSupport_Name, Team_B_HardSupport_Hero," \
                   "Tier, Time"
 
-    with open("data.csv", "a", encoding="utf-8") as f:
+    with open("data2.csv", "a", encoding="utf-8") as f:
         for record in all_records:
             f.write(record + "\n")
 
